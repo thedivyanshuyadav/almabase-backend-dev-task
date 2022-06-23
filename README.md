@@ -1,6 +1,6 @@
-##Almabase - SDE Backend Dev - Task 1
+## Almabase - SDE Backend Dev - Task 1
 
-####Steps to run :
+#### Steps to run :
 1. *Optional: Install and Activate Virtual Environment.*
 2. Clone this repository.
 3. Install dependencies. 
@@ -8,8 +8,8 @@
     - pip install -r requirements.txt
 4. Run command : ***python main.py*** 
 
-####Q. Where to add new fields?
+#### Q. Where to add new fields?
 **Ans.** Add new fields in **Profile** class in main.py.
 
-
+<br /><br />
 Submitted by __Divyanshu Yadav__
