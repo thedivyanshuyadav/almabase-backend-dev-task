@@ -1,3 +1,4 @@
+from dataclasses import fields
 from fuzzywuzzy import fuzz
 
 class BaseProfile:
@@ -17,14 +18,20 @@ class Solution:
     def __init__(self, profiles:list):
         self.profiles = profiles
 
-    def check_fuzz_ratio(self) -> bool:
+    def check_fuzz_ratio(self,fields:list) -> bool:
         """
         This methods checks the fuzz simple ratio between profiles by concatenating (first_name + last_name + email) as parameter.
         
         Return : [Bool] : checks whether the fuzz simple ratio match is greater than 80 or not.
         """
         p1, p2 = self.profiles
-        if fuzz.ratio( str(getattr(p1,'first_name')) + str(getattr(p1,'last_name')) + str(getattr(p1,'email')), str(getattr(p2,'first_name')) + str(getattr(p2,'last_name')) + str(getattr(p2,'email')) ) <= 80 : return False 
+        part1 = []
+        part2 = []
+        for field in fields:
+            part1.append(str(getattr(p1,field)))
+            part2.append(str(getattr(p2,field)))
+        ratio = fuzz.ratio( ''.join(part1), ''.join(part2) )
+        if ratio <= 80 : return False 
         return True
 
     def check_duplicates_result(self,fields:list,sequence:list) -> str:
@@ -55,10 +62,10 @@ class Solution:
                 else:non_matching_attributes.add(field)
 
 
+        # Scoring
+        if self.check_fuzz_ratio(set(['first_name','last_name','email']).intersection(set(fields))):total_score += 1
         fields = [field for field in fields if field not in ['first_name','last_name','email']]
 
-        # Scoring
-        if self.check_fuzz_ratio():total_score += 1
         for field in fields:
             if str(getattr(p1,field)) == str(getattr(p2,field)):
                 matching_attributes.add(field)
