@@ -24,4 +24,4 @@ if __name__ == "__main__":
         date_of_birth = '1990-10-11'
     )
 
-    find_duplicates(profiles=[profile1,profile2],fields=['first_name', 'last_name', 'email', 'class_year', 'date_of_birth'])
+    find_duplicates(profiles=[profile1,profile2],fields=['first_name','last_name'])

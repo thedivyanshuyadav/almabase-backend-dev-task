@@ -23,15 +23,11 @@ class Solution:
         
         Return : [Bool] : checks whether the fuzz simple ratio match is greater than 80 or not.
         """
-        n = len(self.profiles)
-        for i in range(n):
-            for j in range(i,n):
-                p1 = self.profiles[i]
-                p2 = self.profiles[j]
-                if fuzz.ratio( getattr(p1,'first_name') + getattr(p1,'last_name') + getattr(p1,'email'), getattr(p2,'first_name') + getattr(p2,'last_name') + getattr(p2,'email') ) <= 80 : return False 
+        p1, p2 = self.profiles
+        if fuzz.ratio( str(getattr(p1,'first_name')) + str(getattr(p1,'last_name')) + str(getattr(p1,'email')), str(getattr(p2,'first_name')) + str(getattr(p2,'last_name')) + str(getattr(p2,'email')) ) <= 80 : return False 
         return True
 
-    def check_duplicates_result(self,fields:list) -> str:
+    def check_duplicates_result(self,fields:list,sequence:list) -> str:
         """
         This method checks duplicacy between profiles by considering explicitly provided field names.
 
@@ -41,35 +37,38 @@ class Solution:
         Return: 
             Report      [string] : Duplicacy check report.   
         """
+        nth, mth = sequence
+        p1,p2 = self.profiles
+
         temp_profile = BaseProfile(None,None,None)
         all_fields = list(vars(temp_profile).keys())
         
         total_score = 0
-        non_matching_attributes = set()
-        
         ignored_attributes = set([field for field in all_fields if field not in fields])
 
-        matching_attributes = set([field for field in fields if field in ['first_name','last_name','email']])
+        matching_attributes = set()
+        non_matching_attributes = set()
+
+        for field in ['first_name','last_name','email']:
+            if field in fields:
+                if getattr(p1,field) == getattr(p2,field):matching_attributes.add(field)
+                else:non_matching_attributes.add(field)
+
+
         fields = [field for field in fields if field not in ['first_name','last_name','email']]
 
+        # Scoring
         if self.check_fuzz_ratio():total_score += 1
-
-        n = len(self.profiles)
-        for i in range(n):
-            for j in range(i+1,n):
-                p1 = self.profiles[i]
-                p2 = self.profiles[j]
-                for field in fields:
-                    if not getattr(p1,field) or not getattr(p2,field):
-                        ignored_attributes.add(field)
-                    elif getattr(p1,field) == getattr(p2,field):
-                        matching_attributes.add(field)
-                        total_score += 1
-                    else:
-                        non_matching_attributes.add(field)
-                        total_score -= 1
+        for field in fields:
+            if str(getattr(p1,field)) == str(getattr(p2,field)):
+                matching_attributes.add(field)
+                total_score += 1
+            else:
+                non_matching_attributes.add(field)
+                total_score -= 1
         
-        return (f'Profile 1, Profile 2, total match score: {total_score}, matching_attributes: {", ".join(matching_attributes if matching_attributes else ["None"])}, non_matching_attributes: {", ".join(non_matching_attributes if non_matching_attributes else ["None"])}, ignored_attributes: {", ".join(ignored_attributes if ignored_attributes else ["None"])}')
+        # Rendering Report
+        return (f'Profile {nth}, Profile {mth}, total match score: {total_score}, matching_attributes: {", ".join(matching_attributes if matching_attributes else ["None"])}, non_matching_attributes: {", ".join(non_matching_attributes if non_matching_attributes else ["None"])}, ignored_attributes: {", ".join(ignored_attributes if ignored_attributes else ["None"])}')
 
 def find_duplicates(profiles:list,fields:list) -> None:
     """
@@ -81,7 +80,12 @@ def find_duplicates(profiles:list,fields:list) -> None:
     
     Return: None
     """
-    sol = Solution(profiles=profiles)
-    report = sol.check_duplicates_result(fields=fields)
-    print(report)
+    n = len(profiles)
+    for profile1__idx in range(n):
+        for profile2__idx in range(profile1__idx+1,n):
+            profile1 = profiles[profile1__idx]
+            profile2 = profiles[profile2__idx]
+            sol = Solution(profiles=[profile1,profile2])
+            report = sol.check_duplicates_result(fields=fields,sequence=[profile1__idx+1,profile2__idx+1])
+            print(report)
 
